@@ -1,0 +1,160 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+
+
+message User {
+    string user_id = 1;
+}
+
+enum PostState {
+    POST_NORMAL = 0;
+    POST_LOCKED = 1; 
+    POST_HIDDEN = 2;
+}  
+
+enum CommentState {
+    COMMENT_NORMAL = 0;
+    COMMENT_HIDDEN = 1;
+}
+
+enum SubRedditState {
+    SUBREDDIT_PUBLIC = 0;
+    SUBREDDIT_PRIVATE = 1; 
+    SUBREDDIT_HIDDEN = 2;
+}  
+
+enum PostVoteType {
+    POST_UPVOTE = 0;
+    POST_DOWNVOTE = 1;
+}
+
+enum CommentVoteType {
+    COMMENT_UPVOTE = 0;
+    COMMENT_DOWNVOTE = 1;
+}
+
+message Post {
+    User author = 1;
+    int64 score = 2;
+    PostState state = 3;
+    google.protobuf.Timestamp date = 4;
+    SubReddit sub_reddit = 5;
+    string post_id = 6;
+}
+
+message Content {
+    oneof content{
+        Post post = 1;
+        Comment comment = 2;
+    }
+}
+
+message Comment {
+    User author = 1;
+    int64 score = 2;
+    CommentState state = 3;
+    google.protobuf.Timestamp date = 4;
+    Content comment_on = 5;
+    string comment_id = 6;
+}
+
+message SubReddit {
+    string name = 1;
+    SubRedditState state = 2;
+    repeated string tags = 3;
+}
+
+message CreatePostRequest {
+    Post post = 1;
+}
+
+message CreatePostResponse {
+    string response = 1;
+}
+
+message VotePostRequest {
+    string post_id = 1;
+    PostVoteType vote = 2;
+}
+
+message VotePostResponse {
+    string response = 1;
+}
+
+message GetPostRequest {
+    string post_id = 1;
+}
+
+message GetPostResponse {
+    Post post = 1;
+}
+
+message CreateCommentRequest {
+    Comment comment = 1;
+}
+
+message CreateCommentResponse {
+    string response = 1;
+}
+
+message VoteCommentRequest {
+    string comment_id = 1;
+    PostVoteType vote = 2;
+}
+
+message VoteCommentResponse {
+    string response = 1;
+}
+
+message GetPostTopCommentsRequest {
+    string post_id = 1;
+    int64 n = 2;
+}
+
+message GetPostTopCommentsResponse {
+    repeated Comment comments = 1;
+}
+
+message GetCommentTopCommentsRequest {
+    string comment_id = 1;
+    int64 n = 2;
+}
+
+message GetCommentTopCommentsResponse {
+    repeated Comment top_n_comments = 1;
+    repeated Comment top_n_comments_comments = 2;
+}
+
+message GetContentScoreUpdatesRequest {
+    oneof content_id{
+        string post_id = 1;
+        string comment_id = 2;
+    }
+}
+
+message GetContentScoreUpdatesResponse {
+    int64 score = 1;
+}
+
+service Reddit {
+    rpc CreatePost(CreatePostRequest) returns (CreatePostResponse){}
+    rpc VoteOnPost(VotePostRequest) returns (VotePostResponse){}
+    rpc GetPost(GetPostRequest) returns (GetPostResponse){}
+    rpc CreateComment(CreateCommentRequest) returns (CreateCommentResponse){}
+    rpc VoteOnComment(VoteCommentRequest) returns (VoteCommentResponse) {}
+    rpc GetPostTopComments(GetPostTopCommentsRequest) returns (GetPostTopCommentsResponse) {}
+    rpc GetCommentTopComments(GetCommentTopCommentsRequest) returns (GetCommentTopCommentsResponse) {}
+    rpc GetContentScoreUpdates(stream GetContentScoreUpdatesRequest) returns (stream GetContentScoreUpdatesResponse){}
+}
+
+
+
+
+
+
+
+
+
+
+
+
