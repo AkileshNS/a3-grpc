@@ -1,4 +1,3 @@
-# import grpc
 from __future__ import print_function
 import sys
 from pathlib import Path
@@ -6,30 +5,54 @@ file = Path(__file__).resolve()
 parent, root = file.parent, file.parents[1]
 sys.path.append(str(root))
 
-import codeassistant_pb2 as ca_pb2 
-import codeassistant_pb2_grpc as ca_grpc
+import reddit_pb2 as r_pb2 
+import reddit_pb2_grpc as r_grpc
 import grpc
 
-class CodeAssistantClient:
-    """Client for accessing CodeAssistant API."""
+class RedditClient:
+    """Client for accessing Reddit API."""
     def __init__(self, server_addr):
         channel = grpc.insecure_channel(server_addr)
-        self.stub = ca_grpc.CodeAssistantStub(channel)
+        self.stub = r_grpc.RedditStub(channel)
 
-    def generate_pr_description(self, files):
-        request = ca_pb2.PRDescriptionRequest(files=files)
-        return self.stub.GeneratePRDescription(request)
+    def create_post(self, post):
+        request = r_pb2.CreatePostRequest(post=post)
+        return self.stub.CreatePost(request)
 
-    def smart_autocomplete(self, files, repo_content):
-        request = ca_pb2.SmartAutoCompleteRequest(
-            files=files, repository_content=repo_content)  
-        return self.stub.SmartAutocomplete(request)
+    def vote_on_post(self, post_id, vote):
+        request = r_pb2.VoteCommentRequest(
+            post_id=post_id, vote=vote)
+        return self.stub.VoteOnPost(request)
 
-    def chat_gpt_for_code(self, files, issue_desc):
-        request = ca_pb2.ChatGPTForCodeRequest(
-            files=files, issue_description=issue_desc)
-        return self.stub.ChatGPTForCode(request) 
+    def get_post(self, post_id):
+        request = r_pb2.GetPostRequest(post_id=post_id)
+        return self.stub.GetPost(request)
 
-    def virtual_pair_programming(self, request_iterator):
-        response_iterator = self.stub.VirtualPairProgramming(request_iterator)
-        return response_iterator
+    def create_comment(self, comment):
+        request = r_pb2.CreateCommentRequest(comment=comment)
+        return self.stub.CreateComment(request)
+
+    def vote_on_comment(self, comment_id, vote):
+        request = r_pb2.VoteCommentRequest(
+            comment_id=comment_id,
+            vote=vote
+        )
+        return self.stub.VoteOnComment(request)
+
+    def get_post_top_comments(self, post_id, n):
+        request = r_pb2.GetPostTopCommentsRequest(
+            post_id=post_id,
+            n=n
+        )
+        return self.stub.GetPostTopComments(request)
+
+    def get_comment_top_comments(self, comment_id, n):
+        request = r_pb2.GetCommentTopCommentsRequest(
+            comment_id=comment_id, 
+            n=n
+        )
+        return self.stub.GetCommentTopComments(request)
+
+    def get_content_score_updates(self):
+        request_iterator = self.stub.GetContentScoreUpdates(iter([]))
+        return request_iterator
