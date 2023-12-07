@@ -1,0 +1,6 @@
+DUPLICATE_POST_ID_RESPONSE = "Post with Post ID already exists"
+POST_RESPONSE = "Post created successfully"
+VOTE_POST_RESPONSE = "Vote on post stored"
+VOTE_COMMENT_RESPONSE = "Vote on comment stored"
+POST_NOT_FOUND = "Post not found"
+COMMENT_RESPONSE = "Comment created successfully"

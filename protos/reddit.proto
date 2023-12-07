@@ -33,20 +33,30 @@ enum CommentVoteType {
     COMMENT_DOWNVOTE = 1;
 }
 
+enum ContentType{
+    POST = 0;
+    COMMENT = 1;
+}
+
 message Post {
-    User author = 1;
-    int64 score = 2;
-    PostState state = 3;
-    google.protobuf.Timestamp date = 4;
-    SubReddit sub_reddit = 5;
-    string post_id = 6;
+    string title = 1;
+    string content = 2;
+    oneof url{
+        string video_url = 3;
+        string image_url = 4; 
+    }
+    User author = 5;
+    int64 score = 6;
+    PostState state = 7;
+    google.protobuf.Timestamp date = 8;
+    SubReddit sub_reddit = 9;
+    string post_id = 10;
 }
 
 message Content {
-    oneof content{
-        Post post = 1;
-        Comment comment = 2;
-    }
+    string post_id = 1;
+    string comment_id = 2;
+    Content content_type = 3;
 }
 
 message Comment {
@@ -56,6 +66,7 @@ message Comment {
     google.protobuf.Timestamp date = 4;
     Content comment_on = 5;
     string comment_id = 6;
+    bool replies_present = 7;
 }
 
 message SubReddit {
@@ -86,7 +97,10 @@ message GetPostRequest {
 }
 
 message GetPostResponse {
-    Post post = 1;
+    oneof post_response{
+        Post post = 1;
+        string response = 2;
+    }
 }
 
 message CreateCommentRequest {
@@ -99,7 +113,7 @@ message CreateCommentResponse {
 
 message VoteCommentRequest {
     string comment_id = 1;
-    PostVoteType vote = 2;
+    CommentVoteType vote = 2;
 }
 
 message VoteCommentResponse {
@@ -111,8 +125,13 @@ message GetPostTopCommentsRequest {
     int64 n = 2;
 }
 
+message PostCommentsWithReplies {
+    Comment comment = 1;
+    bool replies_present = 2;
+}
+
 message GetPostTopCommentsResponse {
-    repeated Comment comments = 1;
+    repeated PostCommentsWithReplies comments = 1;
 }
 
 message GetCommentTopCommentsRequest {

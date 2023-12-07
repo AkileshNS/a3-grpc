@@ -53,6 +53,6 @@ class RedditClient:
         )
         return self.stub.GetCommentTopComments(request)
 
-    def get_content_score_updates(self):
-        request_iterator = self.stub.GetContentScoreUpdates(iter([]))
-        return request_iterator
+    def get_content_score_updates(self, request_iterator):
+        response_iterator = self.stub.GetContentScoreUpdates(request_iterator)
+        return response_iterator

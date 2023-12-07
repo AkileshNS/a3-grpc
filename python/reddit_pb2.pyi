@@ -33,6 +33,11 @@ class CommentVoteType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = []
     COMMENT_UPVOTE: _ClassVar[CommentVoteType]
     COMMENT_DOWNVOTE: _ClassVar[CommentVoteType]
+
+class ContentType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = []
+    POST: _ClassVar[ContentType]
+    COMMENT: _ClassVar[ContentType]
 POST_NORMAL: PostState
 POST_LOCKED: PostState
 POST_HIDDEN: PostState
@@ -45,6 +50,8 @@ POST_UPVOTE: PostVoteType
 POST_DOWNVOTE: PostVoteType
 COMMENT_UPVOTE: CommentVoteType
 COMMENT_DOWNVOTE: CommentVoteType
+POST: ContentType
+COMMENT: ContentType
 
 class User(_message.Message):
     __slots__ = ["user_id"]
@@ -53,28 +60,38 @@ class User(_message.Message):
     def __init__(self, user_id: _Optional[str] = ...) -> None: ...
 
 class Post(_message.Message):
-    __slots__ = ["author", "score", "state", "date", "sub_reddit", "post_id"]
+    __slots__ = ["title", "content", "video_url", "image_url", "author", "score", "state", "date", "sub_reddit", "post_id"]
+    TITLE_FIELD_NUMBER: _ClassVar[int]
+    CONTENT_FIELD_NUMBER: _ClassVar[int]
+    VIDEO_URL_FIELD_NUMBER: _ClassVar[int]
+    IMAGE_URL_FIELD_NUMBER: _ClassVar[int]
     AUTHOR_FIELD_NUMBER: _ClassVar[int]
     SCORE_FIELD_NUMBER: _ClassVar[int]
     STATE_FIELD_NUMBER: _ClassVar[int]
     DATE_FIELD_NUMBER: _ClassVar[int]
     SUB_REDDIT_FIELD_NUMBER: _ClassVar[int]
     POST_ID_FIELD_NUMBER: _ClassVar[int]
+    title: str
+    content: str
+    video_url: str
+    image_url: str
     author: User
     score: int
     state: PostState
     date: _timestamp_pb2.Timestamp
     sub_reddit: SubReddit
     post_id: str
-    def __init__(self, author: _Optional[_Union[User, _Mapping]] = ..., score: _Optional[int] = ..., state: _Optional[_Union[PostState, str]] = ..., date: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., sub_reddit: _Optional[_Union[SubReddit, _Mapping]] = ..., post_id: _Optional[str] = ...) -> None: ...
+    def __init__(self, title: _Optional[str] = ..., content: _Optional[str] = ..., video_url: _Optional[str] = ..., image_url: _Optional[str] = ..., author: _Optional[_Union[User, _Mapping]] = ..., score: _Optional[int] = ..., state: _Optional[_Union[PostState, str]] = ..., date: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., sub_reddit: _Optional[_Union[SubReddit, _Mapping]] = ..., post_id: _Optional[str] = ...) -> None: ...
 
 class Content(_message.Message):
-    __slots__ = ["post", "comment"]
-    POST_FIELD_NUMBER: _ClassVar[int]
-    COMMENT_FIELD_NUMBER: _ClassVar[int]
-    post: Post
-    comment: Comment
-    def __init__(self, post: _Optional[_Union[Post, _Mapping]] = ..., comment: _Optional[_Union[Comment, _Mapping]] = ...) -> None: ...
+    __slots__ = ["post_id", "comment_id", "content_type"]
+    POST_ID_FIELD_NUMBER: _ClassVar[int]
+    COMMENT_ID_FIELD_NUMBER: _ClassVar[int]
+    CONTENT_TYPE_FIELD_NUMBER: _ClassVar[int]
+    post_id: str
+    comment_id: str
+    content_type: Content
+    def __init__(self, post_id: _Optional[str] = ..., comment_id: _Optional[str] = ..., content_type: _Optional[_Union[Content, _Mapping]] = ...) -> None: ...
 
 class Comment(_message.Message):
     __slots__ = ["author", "score", "state", "date", "comment_on", "comment_id"]
@@ -135,10 +152,12 @@ class GetPostRequest(_message.Message):
     def __init__(self, post_id: _Optional[str] = ...) -> None: ...
 
 class GetPostResponse(_message.Message):
-    __slots__ = ["post"]
+    __slots__ = ["post", "response"]
     POST_FIELD_NUMBER: _ClassVar[int]
+    RESPONSE_FIELD_NUMBER: _ClassVar[int]
     post: Post
-    def __init__(self, post: _Optional[_Union[Post, _Mapping]] = ...) -> None: ...
+    response: str
+    def __init__(self, post: _Optional[_Union[Post, _Mapping]] = ..., response: _Optional[str] = ...) -> None: ...
 
 class CreateCommentRequest(_message.Message):
     __slots__ = ["comment"]
@@ -157,8 +176,8 @@ class VoteCommentRequest(_message.Message):
     COMMENT_ID_FIELD_NUMBER: _ClassVar[int]
     VOTE_FIELD_NUMBER: _ClassVar[int]
     comment_id: str
-    vote: PostVoteType
-    def __init__(self, comment_id: _Optional[str] = ..., vote: _Optional[_Union[PostVoteType, str]] = ...) -> None: ...
+    vote: CommentVoteType
+    def __init__(self, comment_id: _Optional[str] = ..., vote: _Optional[_Union[CommentVoteType, str]] = ...) -> None: ...
 
 class VoteCommentResponse(_message.Message):
     __slots__ = ["response"]
@@ -174,11 +193,19 @@ class GetPostTopCommentsRequest(_message.Message):
     n: int
     def __init__(self, post_id: _Optional[str] = ..., n: _Optional[int] = ...) -> None: ...
 
+class PostCommentsWithReplies(_message.Message):
+    __slots__ = ["comment", "replies_present"]
+    COMMENT_FIELD_NUMBER: _ClassVar[int]
+    REPLIES_PRESENT_FIELD_NUMBER: _ClassVar[int]
+    comment: Comment
+    replies_present: bool
+    def __init__(self, comment: _Optional[_Union[Comment, _Mapping]] = ..., replies_present: bool = ...) -> None: ...
+
 class GetPostTopCommentsResponse(_message.Message):
     __slots__ = ["comments"]
     COMMENTS_FIELD_NUMBER: _ClassVar[int]
-    comments: _containers.RepeatedCompositeFieldContainer[Comment]
-    def __init__(self, comments: _Optional[_Iterable[_Union[Comment, _Mapping]]] = ...) -> None: ...
+    comments: _containers.RepeatedCompositeFieldContainer[PostCommentsWithReplies]
+    def __init__(self, comments: _Optional[_Iterable[_Union[PostCommentsWithReplies, _Mapping]]] = ...) -> None: ...
 
 class GetCommentTopCommentsRequest(_message.Message):
     __slots__ = ["comment_id", "n"]
