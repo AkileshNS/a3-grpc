@@ -86,23 +86,41 @@ class RedditServicer(r_grpc.RedditServicer):
         
         return r_pb2.GetPostTopCommentsResponse(PostCommentsWithReplies=n_top_post_comments)
 
-    
-    
+
+    def ExpandCommentBranch(self, request, context):
+        comment_id = request.comment_id
+        n = request.n
+
+        def get_comments_recursive(comment_id, depth):
+            result = []
+            for comment in comments:
+                if comment.comment_on.content_type == r_pb2.COMMENT and comment.comment_on.comment_id == comment_id:
+                    result.append(comment)
+
+            result.sort(key=lambda x: x.score, reverse=True)
+            result = result[:n]
+
+            if depth > 0:
+                for sub_comment in result:
+                    sub_comment_id = sub_comment.comment_id
+                    sub_comments = get_comments_recursive(sub_comment_id, depth - 1)
+                    sub_comments.sort(key=lambda x: x.score, reverse=True)
+                    sub_comments = sub_comments[:n]
+                    sub_comment.replies_present = bool(sub_comments)
+                    result.extend(sub_comments)
+
+            return result
+
+        comment_branch = get_comments_recursive(comment_id, depth=1)
+
+        expanded_comments = [comment for comment in comment_branch if not comment.comment_on.content_type == r_pb2.COMMENT]
+        expanded_reply_comments = [comment for comment in comment_branch if comment.comment_on.content_type == r_pb2.COMMENT]
+
+        return r_pb2.GetCommentTopCommentsResponse(top_n_comments=expanded_comments,
+                                                    top_n_reply_comments=expanded_reply_comments)
 
 
-        
 
-
-
-                    
-
-
-        
-
-        
-
-
-    
 
 def serve(host, port):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

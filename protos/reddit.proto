@@ -141,7 +141,7 @@ message GetCommentTopCommentsRequest {
 
 message GetCommentTopCommentsResponse {
     repeated Comment top_n_comments = 1;
-    repeated Comment top_n_comments_comments = 2;
+    repeated Comment top_n_reply_comments = 2;
 }
 
 message GetContentScoreUpdatesRequest {
