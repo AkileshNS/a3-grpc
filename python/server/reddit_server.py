@@ -2,21 +2,26 @@ from concurrent import futures
 import grpc
 import sys
 import argparse
-
-
+from grpc_interceptor import ServerInterceptor
+import reddit_pb2 as r_pb2
+import reddit_pb2_grpc as r_grpc
+import utils.constants as Constants
+import time
 from pathlib import Path
+
 file = Path(__file__).resolve()
 parent, root = file.parent, file.parents[1]
 sys.path.append(str(root))
 
-import reddit_pb2 as r_pb2
-import reddit_pb2_grpc as r_grpc
-import utils.constants as Constants
-
 posts = []
 comments = []
 
+class AuthInterceptor(ServerInterceptor):
+    def intercept(self, method, request, context, method_name):
+        return request
+
 class RedditServicer(r_grpc.RedditServicer):
+
     def CreatePost(self, request, context):
         post = request.post        
         posts.append(post)
@@ -120,10 +125,31 @@ class RedditServicer(r_grpc.RedditServicer):
                                                     top_n_reply_comments=expanded_reply_comments)
 
 
+    def GetContentScoreUpdates(self, request_iterator, context):
+        for request in request_iterator:
+            post_id = request.post_id
+            comment_id = request.comment_id
+
+            if post_id:
+                post = next((p for p in posts if p.post_id == post_id), None)
+                if post:
+                    while True:
+                        time.sleep(1)  
+                        yield r_pb2.GetContentScoreUpdatesResponse(score=post.score)
+            elif comment_id:
+                comment = next((c for c in comments if c.comment_id == comment_id), None)
+                if comment:
+                    while True:
+                        time.sleep(1)  
+                        yield r_pb2.GetContentScoreUpdatesResponse(score=comment.score)
+
 
 
 def serve(host, port):
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    interceptors = [AuthInterceptor()]
+
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
+                         interceptors=interceptors)
     r_grpc.add_RedditServicer_to_server(
         RedditServicer(), server)
     server.add_insecure_port(f"{host}:{port}")

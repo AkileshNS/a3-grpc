@@ -1,17 +1,19 @@
 from __future__ import print_function
 import sys
+import reddit_pb2 as r_pb2 
+import reddit_pb2_grpc as r_grpc
+import grpc
 from pathlib import Path
+
 file = Path(__file__).resolve()
 parent, root = file.parent, file.parents[1]
 sys.path.append(str(root))
 
-import reddit_pb2 as r_pb2 
-import reddit_pb2_grpc as r_grpc
-import grpc
 
 class RedditClient:
     """Client for accessing Reddit API."""
-    def __init__(self, server_addr):
+    def __init__(self, host, port):
+        server_addr = f"{host}:{port}"
         channel = grpc.insecure_channel(server_addr)
         self.stub = r_grpc.RedditStub(channel)
 
@@ -56,3 +58,4 @@ class RedditClient:
     def get_content_score_updates(self, request_iterator):
         response_iterator = self.stub.GetContentScoreUpdates(request_iterator)
         return response_iterator
+    
