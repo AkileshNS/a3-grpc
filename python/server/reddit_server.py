@@ -91,6 +91,12 @@ class RedditServicer(r_grpc.RedditServicer):
 
 
     def ExpandCommentBranch(self, request, context):
+
+        def getCommentFromCommentID(comment_id):
+            for comment in comments:
+                if comment.comment_id == comment_id:
+                    return comment
+        
         comment_id = request.comment_id
         n = request.n
 
@@ -105,29 +111,29 @@ class RedditServicer(r_grpc.RedditServicer):
         
         sorted_comments = dict(sorted(all_comments.items()))
 
-        for _, val in sorted(sorted_comments.items(), key=lambda x: x[0], reverse=True)[:n]:
-            top_n_comments[val] = []
+        for _, comment in sorted(sorted_comments.items(), key=lambda x: x[0], reverse=True)[:n]:
+            top_n_comments[comment.comment_id] = []
 
-        for top_comment in top_n_comments:
+        for comment_id, _ in top_n_comments.items():
             top_n_replies = {}
             for comment in comments:
                 if comment.comment_on.content_type == r_pb2.COMMENT and comment.state == r_pb2.COMMENT_NORMAL:
-                    if comment.comment_on.comment_id == top_comment.comment_id:
+                    if comment.comment_on.comment_id == comment_id:
                         top_n_replies[comment.score] = comment
             
             sorted_replies = dict(sorted(top_n_replies.items()))
             for _, val in sorted(sorted_replies.items(), key=lambda x: x[0], reverse=True)[:n]:
-                top_n_comments[top_comment].append(val)
+                top_n_comments[comment_id].append(val)
 
-        for top_comment, top_n_replies in top_n_comments:
-            top_n_comments_replies.append({
-                r_pb2.CommentsReplies(
-                    top_comment = top_comment,
-                    top_n_replies= top_n_replies
-                )
-            }
-        )
-        return r_pb2.GetCommentTopCommentsResponse(top_n_comments_replies=top_n_comments_replies)
+        for comment_id, top_n_replies in top_n_comments.items():
+            top_n_comments_replies.append(
+                    r_pb2.CommentsReplies(
+                        top_comment = getCommentFromCommentID(comment_id),
+                        top_n_replies= top_n_replies
+                    )
+            )
+
+        return r_pb2.ExpandCommentBranchResponse(top_n_comments_replies=top_n_comments_replies)
 
 
     def GetContentScoreUpdates(self, request_iterator, context):

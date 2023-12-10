@@ -45,6 +45,6 @@ comment21 = r_pb2.Comment(author=r_pb2.User(user_id="U"), score=20, state = r_pb
 
 
 COMMENTS = [comment1, comment2, comment3, comment4, comment5, comment6, comment7, comment8, comment9, comment10, comment11, comment12,
-            comment13, comment14, comment15, comment16, comment17, comment18, comment19, comment20, comment20]
+            comment13, comment14, comment15, comment16, comment17, comment18, comment19, comment20, comment21]
 
 POSTS = [post1, post2, post3, post4]

@@ -13,6 +13,9 @@ import client.reddit_client as reddit_client
 class TestRedditClient:
     def test_generate_pr_description_positive(self):
         self.client = reddit_client.RedditClient(Constants.HOST, Constants.PORT)
-        response = self.client.get_comment_top_comments
+        comment_id = "C1"
+        n = 1
+        response = self.client.get_expand_comment_branch(comment_id, n)
+        print(response)
 
 
