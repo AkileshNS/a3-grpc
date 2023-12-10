@@ -48,12 +48,12 @@ class RedditClient:
         )
         return self.stub.GetPostTopComments(request)
 
-    def get_comment_top_comments(self, comment_id, n):
-        request = r_pb2.GetCommentTopCommentsRequest(
+    def get_expand_comment_branch(self, comment_id, n):
+        request = r_pb2.ExpandCommentBranchRequest(
             comment_id=comment_id, 
             n=n
         )
-        return self.stub.GetCommentTopComments(request)
+        return self.stub.ExpandCommentBranch(request)
 
     def get_content_score_updates(self, request_iterator):
         response_iterator = self.stub.GetContentScoreUpdates(request_iterator)

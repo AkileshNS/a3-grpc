@@ -1,13 +1,15 @@
 from google.protobuf.timestamp_pb2 import Timestamp
 import reddit_pb2 as r_pb2
 
-
 DUPLICATE_POST_ID_RESPONSE = "Post with Post ID already exists"
 POST_RESPONSE = "Post created successfully"
 VOTE_POST_RESPONSE = "Vote on post stored"
 VOTE_COMMENT_RESPONSE = "Vote on comment stored"
 POST_NOT_FOUND = "Post not found"
 COMMENT_RESPONSE = "Comment created successfully"
+
+HOST = "localhost"
+PORT = 50051
 
 post1 = r_pb2.Post(title = "You won't believe this!", content = "Dog drives car", video_url="r.com/123", author = r_pb2.User(user_id="A"), score = 20, state = r_pb2.POST_NORMAL, sub_reddit = r_pb2.SubReddit(name="r/Dogs", state=r_pb2.SUBREDDIT_PUBLIC), post_id = 'P1')
 post2 = r_pb2.Post(title = "FUNNY", content = "2010 Memes", image_url="r.com/235", author = r_pb2.User(user_id="B"), score = 25, state = r_pb2.POST_NORMAL, sub_reddit = r_pb2.SubReddit(name="r/memes", state=r_pb2.SUBREDDIT_PUBLIC), post_id = 'P2')

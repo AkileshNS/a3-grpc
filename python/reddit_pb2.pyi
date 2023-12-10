@@ -209,7 +209,7 @@ class GetPostTopCommentsResponse(_message.Message):
     comments: _containers.RepeatedCompositeFieldContainer[PostCommentsWithReplies]
     def __init__(self, comments: _Optional[_Iterable[_Union[PostCommentsWithReplies, _Mapping]]] = ...) -> None: ...
 
-class GetCommentTopCommentsRequest(_message.Message):
+class ExpandCommentBranchRequest(_message.Message):
     __slots__ = ["comment_id", "n"]
     COMMENT_ID_FIELD_NUMBER: _ClassVar[int]
     N_FIELD_NUMBER: _ClassVar[int]
@@ -239,7 +239,7 @@ class CommentsReplies(_message.Message):
     top_n_replies: _containers.RepeatedCompositeFieldContainer[Comment]
     def __init__(self, top_comment: _Optional[_Union[Comment, _Mapping]] = ..., top_n_replies: _Optional[_Iterable[_Union[Comment, _Mapping]]] = ...) -> None: ...
 
-class GetCommentTopCommentsResponse(_message.Message):
+class ExpandCommentBranchResponse(_message.Message):
     __slots__ = ["top_n_comments_replies"]
     TOP_N_COMMENTS_REPLIES_FIELD_NUMBER: _ClassVar[int]
     top_n_comments_replies: _containers.RepeatedCompositeFieldContainer[CommentsReplies]

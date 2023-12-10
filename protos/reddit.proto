@@ -136,7 +136,7 @@ message GetPostTopCommentsResponse {
     repeated PostCommentsWithReplies comments = 1;
 }
 
-message GetCommentTopCommentsRequest {
+message ExpandCommentBranchRequest {
     string comment_id = 1;
     int64 n = 2;
 }
@@ -155,7 +155,7 @@ message CommentsReplies {
     repeated Comment top_n_replies = 2;
 }
 
-message GetCommentTopCommentsResponse {
+message ExpandCommentBranchResponse {
     repeated CommentsReplies top_n_comments_replies = 1;
 }
 
@@ -177,7 +177,7 @@ service Reddit {
     rpc CreateComment(CreateCommentRequest) returns (CreateCommentResponse){}
     rpc VoteOnComment(VoteCommentRequest) returns (VoteCommentResponse) {}
     rpc GetPostTopComments(GetPostTopCommentsRequest) returns (GetPostTopCommentsResponse) {}
-    rpc GetCommentTopComments(GetCommentTopCommentsRequest) returns (GetCommentTopCommentsResponse) {}
+    rpc ExpandCommentBranch(ExpandCommentBranchRequest) returns (ExpandCommentBranchResponse) {}
     rpc GetContentScoreUpdates(stream GetContentScoreUpdatesRequest) returns (stream GetContentScoreUpdatesResponse){}
 }
 
