@@ -90,24 +90,26 @@ class Content(_message.Message):
     CONTENT_TYPE_FIELD_NUMBER: _ClassVar[int]
     post_id: str
     comment_id: str
-    content_type: Content
-    def __init__(self, post_id: _Optional[str] = ..., comment_id: _Optional[str] = ..., content_type: _Optional[_Union[Content, _Mapping]] = ...) -> None: ...
+    content_type: ContentType
+    def __init__(self, post_id: _Optional[str] = ..., comment_id: _Optional[str] = ..., content_type: _Optional[_Union[ContentType, str]] = ...) -> None: ...
 
 class Comment(_message.Message):
-    __slots__ = ["author", "score", "state", "date", "comment_on", "comment_id"]
+    __slots__ = ["author", "score", "state", "date", "comment_on", "comment_id", "replies_present"]
     AUTHOR_FIELD_NUMBER: _ClassVar[int]
     SCORE_FIELD_NUMBER: _ClassVar[int]
     STATE_FIELD_NUMBER: _ClassVar[int]
     DATE_FIELD_NUMBER: _ClassVar[int]
     COMMENT_ON_FIELD_NUMBER: _ClassVar[int]
     COMMENT_ID_FIELD_NUMBER: _ClassVar[int]
+    REPLIES_PRESENT_FIELD_NUMBER: _ClassVar[int]
     author: User
     score: int
     state: CommentState
     date: _timestamp_pb2.Timestamp
     comment_on: Content
     comment_id: str
-    def __init__(self, author: _Optional[_Union[User, _Mapping]] = ..., score: _Optional[int] = ..., state: _Optional[_Union[CommentState, str]] = ..., date: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., comment_on: _Optional[_Union[Content, _Mapping]] = ..., comment_id: _Optional[str] = ...) -> None: ...
+    replies_present: bool
+    def __init__(self, author: _Optional[_Union[User, _Mapping]] = ..., score: _Optional[int] = ..., state: _Optional[_Union[CommentState, str]] = ..., date: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., comment_on: _Optional[_Union[Content, _Mapping]] = ..., comment_id: _Optional[str] = ..., replies_present: bool = ...) -> None: ...
 
 class SubReddit(_message.Message):
     __slots__ = ["name", "state", "tags"]
@@ -215,13 +217,33 @@ class GetCommentTopCommentsRequest(_message.Message):
     n: int
     def __init__(self, comment_id: _Optional[str] = ..., n: _Optional[int] = ...) -> None: ...
 
+class Pair(_message.Message):
+    __slots__ = ["key", "value"]
+    KEY_FIELD_NUMBER: _ClassVar[int]
+    VALUE_FIELD_NUMBER: _ClassVar[int]
+    key: str
+    value: str
+    def __init__(self, key: _Optional[str] = ..., value: _Optional[str] = ...) -> None: ...
+
+class Dictionary(_message.Message):
+    __slots__ = ["pairs"]
+    PAIRS_FIELD_NUMBER: _ClassVar[int]
+    pairs: _containers.RepeatedCompositeFieldContainer[Pair]
+    def __init__(self, pairs: _Optional[_Iterable[_Union[Pair, _Mapping]]] = ...) -> None: ...
+
+class CommentsReplies(_message.Message):
+    __slots__ = ["top_comment", "top_n_replies"]
+    TOP_COMMENT_FIELD_NUMBER: _ClassVar[int]
+    TOP_N_REPLIES_FIELD_NUMBER: _ClassVar[int]
+    top_comment: Comment
+    top_n_replies: _containers.RepeatedCompositeFieldContainer[Comment]
+    def __init__(self, top_comment: _Optional[_Union[Comment, _Mapping]] = ..., top_n_replies: _Optional[_Iterable[_Union[Comment, _Mapping]]] = ...) -> None: ...
+
 class GetCommentTopCommentsResponse(_message.Message):
-    __slots__ = ["top_n_comments", "top_n_comments_comments"]
-    TOP_N_COMMENTS_FIELD_NUMBER: _ClassVar[int]
-    TOP_N_COMMENTS_COMMENTS_FIELD_NUMBER: _ClassVar[int]
-    top_n_comments: _containers.RepeatedCompositeFieldContainer[Comment]
-    top_n_comments_comments: _containers.RepeatedCompositeFieldContainer[Comment]
-    def __init__(self, top_n_comments: _Optional[_Iterable[_Union[Comment, _Mapping]]] = ..., top_n_comments_comments: _Optional[_Iterable[_Union[Comment, _Mapping]]] = ...) -> None: ...
+    __slots__ = ["top_n_comments_replies"]
+    TOP_N_COMMENTS_REPLIES_FIELD_NUMBER: _ClassVar[int]
+    top_n_comments_replies: _containers.RepeatedCompositeFieldContainer[CommentsReplies]
+    def __init__(self, top_n_comments_replies: _Optional[_Iterable[_Union[CommentsReplies, _Mapping]]] = ...) -> None: ...
 
 class GetContentScoreUpdatesRequest(_message.Message):
     __slots__ = ["post_id", "comment_id"]

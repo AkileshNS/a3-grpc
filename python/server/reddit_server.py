@@ -2,23 +2,21 @@ from concurrent import futures
 import grpc
 import sys
 import argparse
-from grpc_interceptor import ServerInterceptor
-import reddit_pb2 as r_pb2
-import reddit_pb2_grpc as r_grpc
-import utils.constants as Constants
-import time
 from pathlib import Path
 
 file = Path(__file__).resolve()
 parent, root = file.parent, file.parents[1]
 sys.path.append(str(root))
 
-posts = []
-comments = []
+import reddit_pb2 as r_pb2
+import reddit_pb2_grpc as r_grpc
+import utils.constants as Constants
+import time
 
-class AuthInterceptor(ServerInterceptor):
-    def intercept(self, method, request, context, method_name):
-        return request
+
+posts = Constants.POSTS
+comments = Constants.COMMENTS
+
 
 class RedditServicer(r_grpc.RedditServicer):
 
@@ -96,33 +94,40 @@ class RedditServicer(r_grpc.RedditServicer):
         comment_id = request.comment_id
         n = request.n
 
-        def get_comments_recursive(comment_id, depth):
-            result = []
+        all_comments = {}
+        top_n_comments = {}
+        top_n_comments_replies = []
+
+        for comment in comments:
+            if comment.comment_on.content_type == r_pb2.COMMENT:
+                if comment.comment_on.comment_id == comment_id:
+                    all_comments[comment.score] = comment
+        
+        sorted_comments = dict(sorted(all_comments.items()))
+
+        for _, val in sorted(sorted_comments.items(), key=lambda x: x[0], reverse=True)[:n]:
+            top_n_comments[val] = []
+
+        for top_comment in top_n_comments:
+            top_n_replies = {}
             for comment in comments:
-                if comment.comment_on.content_type == r_pb2.COMMENT and comment.comment_on.comment_id == comment_id:
-                    result.append(comment)
+                if comment.comment_on.content_type == r_pb2.COMMENT and comment.state == r_pb2.COMMENT_NORMAL:
+                    if comment.comment_on.comment_id == top_comment.comment_id:
+                        top_n_replies[comment.score] = comment
+            
+            sorted_replies = dict(sorted(top_n_replies.items()))
+            for _, val in sorted(sorted_replies.items(), key=lambda x: x[0], reverse=True)[:n]:
+                top_n_comments[top_comment].append(val)
 
-            result.sort(key=lambda x: x.score, reverse=True)
-            result = result[:n]
-
-            if depth > 0:
-                for sub_comment in result:
-                    sub_comment_id = sub_comment.comment_id
-                    sub_comments = get_comments_recursive(sub_comment_id, depth - 1)
-                    sub_comments.sort(key=lambda x: x.score, reverse=True)
-                    sub_comments = sub_comments[:n]
-                    sub_comment.replies_present = bool(sub_comments)
-                    result.extend(sub_comments)
-
-            return result
-
-        comment_branch = get_comments_recursive(comment_id, depth=1)
-
-        expanded_comments = [comment for comment in comment_branch if not comment.comment_on.content_type == r_pb2.COMMENT]
-        expanded_reply_comments = [comment for comment in comment_branch if comment.comment_on.content_type == r_pb2.COMMENT]
-
-        return r_pb2.GetCommentTopCommentsResponse(top_n_comments=expanded_comments,
-                                                    top_n_reply_comments=expanded_reply_comments)
+        for top_comment, top_n_replies in top_n_comments:
+            top_n_comments_replies.append({
+                r_pb2.CommentsReplies(
+                    top_comment = top_comment,
+                    top_n_replies= top_n_replies
+                )
+            }
+        )
+        return r_pb2.GetCommentTopCommentsResponse(top_n_comments_replies=top_n_comments_replies)
 
 
     def GetContentScoreUpdates(self, request_iterator, context):
@@ -146,10 +151,8 @@ class RedditServicer(r_grpc.RedditServicer):
 
 
 def serve(host, port):
-    interceptors = [AuthInterceptor()]
 
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
-                         interceptors=interceptors)
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     r_grpc.add_RedditServicer_to_server(
         RedditServicer(), server)
     server.add_insecure_port(f"{host}:{port}")

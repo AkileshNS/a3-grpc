@@ -54,9 +54,11 @@ message Post {
 }
 
 message Content {
-    string post_id = 1;
-    string comment_id = 2;
-    Content content_type = 3;
+    oneof content_id{
+        string post_id = 1;
+        string comment_id = 2;
+    }
+    ContentType content_type = 3;
 }
 
 message Comment {
@@ -139,9 +141,22 @@ message GetCommentTopCommentsRequest {
     int64 n = 2;
 }
 
+message Pair {
+    string key = 1;
+    string value = 2;
+ }
+ 
+ message Dictionary {
+    repeated Pair pairs = 1;
+ }
+
+message CommentsReplies {
+    Comment top_comment = 1;
+    repeated Comment top_n_replies = 2;
+}
+
 message GetCommentTopCommentsResponse {
-    repeated Comment top_n_comments = 1;
-    repeated Comment top_n_reply_comments = 2;
+    repeated CommentsReplies top_n_comments_replies = 1;
 }
 
 message GetContentScoreUpdatesRequest {
