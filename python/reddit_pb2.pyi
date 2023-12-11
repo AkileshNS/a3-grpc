@@ -217,20 +217,6 @@ class ExpandCommentBranchRequest(_message.Message):
     n: int
     def __init__(self, comment_id: _Optional[str] = ..., n: _Optional[int] = ...) -> None: ...
 
-class Pair(_message.Message):
-    __slots__ = ["key", "value"]
-    KEY_FIELD_NUMBER: _ClassVar[int]
-    VALUE_FIELD_NUMBER: _ClassVar[int]
-    key: str
-    value: str
-    def __init__(self, key: _Optional[str] = ..., value: _Optional[str] = ...) -> None: ...
-
-class Dictionary(_message.Message):
-    __slots__ = ["pairs"]
-    PAIRS_FIELD_NUMBER: _ClassVar[int]
-    pairs: _containers.RepeatedCompositeFieldContainer[Pair]
-    def __init__(self, pairs: _Optional[_Iterable[_Union[Pair, _Mapping]]] = ...) -> None: ...
-
 class CommentsReplies(_message.Message):
     __slots__ = ["top_comment", "top_n_replies"]
     TOP_COMMENT_FIELD_NUMBER: _ClassVar[int]

@@ -48,7 +48,7 @@ class RedditClient:
         )
         return self.stub.GetPostTopComments(request)
 
-    def get_expand_comment_branch(self, comment_id, n):
+    def get_expanded_comment_branch(self, comment_id, n):
         request = r_pb2.ExpandCommentBranchRequest(
             comment_id=comment_id, 
             n=n

@@ -1,7 +1,7 @@
 from concurrent import futures
 import grpc
-import sys
 import argparse
+import sys
 from pathlib import Path
 
 file = Path(__file__).resolve()
@@ -19,7 +19,6 @@ comments = Constants.COMMENTS
 
 
 class RedditServicer(r_grpc.RedditServicer):
-
     def CreatePost(self, request, context):
         post = request.post        
         posts.append(post)
@@ -74,20 +73,22 @@ class RedditServicer(r_grpc.RedditServicer):
     def GetPostTopComments(self, request, context):
         post_id = request.post_id
         n = request.n
-        post_comments = []
-        n_top_post_comments = []
 
+        post_comments = {}
+        top_n_post_comments = []
+        
         for comment in comments:
             if comment.comment_on.content_type == r_pb2.POST:
-                if comment.comment_on.content_type.post_id == post_id:
-                    post_comments.append([comment.score, r_pb2.PostCommentsWithReplies(comment=comment, replies_present=comment.replies_present)])
+                if comment.comment_on.post_id == post_id:
+                    post_comments[comment.score] = comment
 
-        post_comments.sort(key=lambda x: 0)
-        post_comments = post_comments[-n:]
-        for _, value in post_comments:
-            n_top_post_comments.append(value)
         
-        return r_pb2.GetPostTopCommentsResponse(PostCommentsWithReplies=n_top_post_comments)
+        sorted_comments = dict(sorted(post_comments.items()))
+
+        for _, comment in sorted(sorted_comments.items(), key=lambda x: x[0], reverse=True)[:n]:
+            top_n_post_comments.append(r_pb2.PostCommentsWithReplies(comment=comment, replies_present=comment.replies_present))
+
+        return r_pb2.GetPostTopCommentsResponse(comments=top_n_post_comments)
 
 
     def ExpandCommentBranch(self, request, context):
