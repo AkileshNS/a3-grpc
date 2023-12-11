@@ -11,7 +11,9 @@ COMMENT_RESPONSE = "Comment created successfully"
 HOST = "localhost"
 PORT = 50051
 
-POST_ID = 'P1'
+POST_ID_1 = 'P1'
+POST_ID_2 = 'P2'
+
 
 post1 = r_pb2.Post(title = "You won't believe this!", content = "Dog drives car", video_url="r.com/123", author = r_pb2.User(user_id="A"), score = 20, state = r_pb2.POST_NORMAL, sub_reddit = r_pb2.SubReddit(name="r/Dogs", state=r_pb2.SUBREDDIT_PUBLIC), post_id = 'P1')
 post2 = r_pb2.Post(title = "FUNNY", content = "2010 Memes", image_url="r.com/235", author = r_pb2.User(user_id="B"), score = 25, state = r_pb2.POST_NORMAL, sub_reddit = r_pb2.SubReddit(name="r/memes", state=r_pb2.SUBREDDIT_PUBLIC), post_id = 'P2')
@@ -44,6 +46,21 @@ comment18 = r_pb2.Comment(author=r_pb2.User(user_id="R"), score=5, state = r_pb2
 comment19 = r_pb2.Comment(author=r_pb2.User(user_id="S"), score=10, state = r_pb2.COMMENT_NORMAL, comment_on=r_pb2.Content(content_type=r_pb2.COMMENT, comment_id='C5'), comment_id='C15', replies_present=False)
 comment20 = r_pb2.Comment(author=r_pb2.User(user_id="T"), score=15, state = r_pb2.COMMENT_NORMAL, comment_on=r_pb2.Content(content_type=r_pb2.COMMENT, comment_id='C5'), comment_id='C16', replies_present=False)
 comment21 = r_pb2.Comment(author=r_pb2.User(user_id="U"), score=20, state = r_pb2.COMMENT_NORMAL, comment_on=r_pb2.Content(content_type=r_pb2.COMMENT, comment_id='C5'), comment_id='C17', replies_present=False)
+
+comment_reply_1 = r_pb2.ExpandCommentBranchResponse(top_n_comments_replies=
+[r_pb2.CommentsReplies(
+                        top_comment = comment5,
+                        top_n_replies= [comment21]
+                    )
+]
+)
+
+comments_1 = r_pb2.GetPostTopCommentsResponse(comments=[
+                                                    r_pb2.PostCommentsWithReplies(comment=comment1, replies_present=True)
+                                                        ]
+                                            )   
+                                              
+
 
 
 COMMENTS = [comment1, comment2, comment3, comment4, comment5, comment6, comment7, comment8, comment9, comment10, comment11, comment12,
