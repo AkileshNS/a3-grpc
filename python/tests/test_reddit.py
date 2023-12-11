@@ -3,6 +3,7 @@ from pathlib import Path
 import unittest
 from unittest.mock import MagicMock
 
+# Resolving the path to the current script and adding its parent directory to the Python path
 file = Path(__file__).resolve()
 parent, root = file.parent, file.parents[1]
 sys.path.append(str(root))
@@ -14,6 +15,14 @@ import tests.operations as operations
 class TestPerformOperations(unittest.TestCase):
 
     def test_perform_multiple_operations_happy_path(self):
+        """
+        Test the happy path of perform_multiple_operations function.
+
+        - Mocks a RedditClient instance.
+        - Sets up expected results for get_post, get_post_top_comments, and get_expanded_comment_branch.
+        - Calls perform_multiple_operations with the mock client and a post ID.
+        - Verifies that the function returns the expected result and makes the correct calls to the client's methods.
+        """
         mock_client = MagicMock(spec=reddit_client.RedditClient)
         post_id = Constants.POST_ID_1
 
@@ -34,16 +43,31 @@ class TestPerformOperations(unittest.TestCase):
         mock_client.get_expanded_comment_branch.assert_called_once_with(expected_top_comment.comments[0].comment.comment_id, 1)
 
     def test_perform_multiple_operations_api_failure(self):
+        """
+        Test perform_multiple_operations when an API failure occurs.
+
+        - Mocks a RedditClient instance.
+        - Sets up an exception to be raised when get_post is called.
+        - Calls perform_multiple_operations with the mock client and a post ID.
+        - Verifies that the function raises an exception.
+        """
         mock_client = MagicMock(spec=reddit_client.RedditClient)
         post_id = Constants.POST_ID_1
 
-        # Simulate an exception when calling get_post
         mock_client.get_post.side_effect = Exception("API Error")
 
         with self.assertRaises(Exception):
             operations.perform_multiple_operations(mock_client, post_id)
 
     def test_perform_multiple_operations_no_top_comment(self):
+        """
+        Test perform_multiple_operations when there is no top comment.
+
+        - Mocks a RedditClient instance.
+        - Sets up expected results for get_post and get_post_top_comments.
+        - Calls perform_multiple_operations with the mock client and a post ID.
+        - Verifies that the function returns None.
+        """
         mock_client = MagicMock(spec=reddit_client.RedditClient)
         post_id = Constants.POST_ID_2
 
@@ -62,6 +86,14 @@ class TestPerformOperations(unittest.TestCase):
 
 
     def test_perform_multiple_operations_no_comment_reply(self):
+        """
+        Test perform_multiple_operations when there is no comment reply.
+
+        - Mocks a RedditClient instance.
+        - Sets up expected results for get_post, get_post_top_comments, and get_expanded_comment_branch.
+        - Calls perform_multiple_operations with the mock client and a post ID.
+        - Verifies that the function returns None.
+        """
         mock_client = MagicMock(spec=reddit_client.RedditClient)
         post_id = Constants.POST_ID_3
 

@@ -1,4 +1,3 @@
-from google.protobuf.timestamp_pb2 import Timestamp
 import reddit_pb2 as r_pb2
 
 DUPLICATE_POST_ID_RESPONSE = "Post with Post ID already exists"

@@ -1,13 +1,14 @@
-import sys
-from pathlib import Path
-
-file = Path(__file__).resolve()
-parent, root = file.parent, file.parents[1]
-sys.path.append(str(root))
-
-import utils.constants as Constants
-
 def perform_multiple_operations(Client, post_id):
+    """
+    Perform multiple operations using the gRPC client.
+
+    Parameters:
+    - Client: An instance of the gRPC client.
+    - post_id (str): The ID of the post to perform operations on.
+
+    Returns:
+    - Most upvoted comment and its replies as a result of the operations.
+    """
     post = Client.get_post(post_id)
     most_upvoted_comment = Client.get_post_top_comments(post_id, 1)
 
