@@ -12,6 +12,7 @@ import client.reddit_client as reddit_client
 import tests.operations as operations
 
 class TestPerformOperations(unittest.TestCase):
+
     def test_perform_multiple_operations_happy_path(self):
         mock_client = MagicMock(spec=reddit_client.RedditClient)
         post_id = Constants.POST_ID_1
@@ -28,8 +29,8 @@ class TestPerformOperations(unittest.TestCase):
 
         self.assertEqual(result, expected_expanded_comment_branch)
 
-        mock_client.get_post.assert_called_once_with(Constants.POST_ID)
-        mock_client.get_post_top_comments.assert_called_once_with(Constants.POST_ID, 1)
+        mock_client.get_post.assert_called_once_with(Constants.POST_ID_1)
+        mock_client.get_post_top_comments.assert_called_once_with(Constants.POST_ID_1, 1)
         mock_client.get_expanded_comment_branch.assert_called_once_with(expected_top_comment.comments[0].comment.comment_id, 1)
 
     def test_perform_multiple_operations_api_failure(self):
@@ -53,22 +54,25 @@ class TestPerformOperations(unittest.TestCase):
         # Simulate get_post returning a post with no top comment
         mock_client.get_post.return_value = expected_post
         mock_client.get_post_top_comments.return_value = expected_top_comment
+        mock_client.get_expanded_comment_branch.return_value = expected_expanded_comment_branch
 
         result = operations.perform_multiple_operations(mock_client, post_id)
 
         self.assertIsNone(result)
 
+
     def test_perform_multiple_operations_no_comment_reply(self):
         mock_client = MagicMock(spec=reddit_client.RedditClient)
+        post_id = Constants.POST_ID_3
 
-        expected_post = MagicMock()
-        expected_top_comment = MagicMock()
-        expected_expanded_comment_branch = MagicMock(comments=[])
+        expected_post = Constants.post3
+        expected_top_comment = Constants.comments_3
+        expected_expanded_comment_branch = None
 
         mock_client.get_post.return_value = expected_post
         mock_client.get_post_top_comments.return_value = expected_top_comment
         mock_client.get_expanded_comment_branch.return_value = expected_expanded_comment_branch
 
-        result = operations.perform_multiple_operations(mock_client)
+        result = operations.perform_multiple_operations(mock_client, post_id)
 
         self.assertEqual(result, expected_expanded_comment_branch)
